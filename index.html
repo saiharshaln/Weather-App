@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="card">
+      <div class="search">
+        <input type="text" placeholder="Enter City Name" spellcheck="false" />
+        <button><img src="images/search.png" alt="search" /></button>
+        <button id="toggleBtn">Toggle °C/°F</button>
+      </div>
+      <div class="error">
+        <p>Invalid City Name</p>
+      </div>
+      <div class="weather">
+        <img src="images/rain.png" alt="rain.png" class="weather-img" />
+        <h1 class="temp">22°C</h1>
+        <h2 class="city">Ottawa</h2>
+        <div class="details">
+          <div class="col">
+            <img src="images/humidity.png" />
+            <div>
+              <p class="humidity">50%</p>
+              <p>Humidity</p>
+            </div>
+          </div>
+          <div class="col">
+            <img src="images/wind.png" />
+            <div>
+              <p class="wind">15 KM/H</p>
+              <p>Wind Speed</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const apiKey = "576718caa8ccac87cb60449fc2c39af3";
+      const apiLink =
+        "https://api.openweathermap.org/data/2.5/weather?&units=metric&q=";
+
+      const searchBar = document.querySelector(".search input");
+      const searchBtn = document.querySelector(".search button");
+      const weatherImg = document.querySelector(".weather-img");
+      const toggleBtn = document.getElementById("toggleBtn");
+      let isCelsius = true;
+      let celsiusTemp = 0;
+
+      async function weatherCheck(city) {
+        const response = await fetch(apiLink + city + `&appid=${apiKey}`);
+        if (response.status == 404) {
+          document.querySelector(".error").style.display = "block";
+          document.querySelector(".weather").style.display = "none";
+        } else {
+          var data = await response.json();
+          document.querySelector(".city").innerHTML = data.name;
+
+          // Store temperature in Celsius
+          celsiusTemp = Math.round(data.main.temp);
+          document.querySelector(".temp").innerHTML = celsiusTemp + "°C";
+
+          document.querySelector(".humidity").innerHTML =
+            data.main.humidity + "%";
+          document.querySelector(".wind").innerHTML = data.wind.speed + "KM/H";
+          if (data.weather[0].main == "Clouds") {
+            weatherImg.src = "images/clouds.png";
+          } else if (data.weather[0].main == "Clear") {
+            weatherImg.src = "images/clear.png";
+          } else if (data.weather[0].main == "Rain") {
+            weatherImg.src = "images/rain.png";
+          } else if (data.weather[0].main == "Drizzle") {
+            weatherImg.src = "images/drizzle.png";
+          } else if (data.weather[0].main == "Mist") {
+            weatherImg.src = "images/mist.png";
+          }
+          document.querySelector(".weather").style.display = "block";
+          document.querySelector(".error").style.display = "none";
+        }
+      }
+
+      toggleBtn.addEventListener("click", () => {
+        const tempElement = document.querySelector(".temp");
+        if (isCelsius) {
+          const fahrenheitTemp = (celsiusTemp * 9) / 5 + 32;
+          tempElement.textContent = `${Math.round(fahrenheitTemp)}°F`;
+          toggleBtn.textContent = "Toggle °F/°C";
+          isCelsius = false;
+        } else {
+          tempElement.textContent = `${celsiusTemp}°C`;
+          toggleBtn.textContent = "Toggle °C/°F";
+          isCelsius = true;
+        }
+      });
+
+      searchBtn.addEventListener("click", () => {
+        weatherCheck(searchBar.value);
+      });
+    </script>
+  </body>
+</html>
